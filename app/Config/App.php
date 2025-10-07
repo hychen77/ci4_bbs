@@ -21,7 +21,9 @@ class App extends BaseConfig
 	| environments.
 	|
 	*/
-	public $baseURL = 'http://localhost:8080/';
+	// 나는 http://ci4_bbs.net/ 설정 
+	// http://localhost/ 로 설정하면 될것 같음
+	public $baseURL = 'http://ci4_bbs.net/';
 
 	/*
 	|--------------------------------------------------------------------------
@@ -33,7 +35,7 @@ class App extends BaseConfig
 	| variable so that it is blank.
 	|
 	*/
-	public $indexPage = 'index.php';
+	// public $indexPage = 'index.php';
 
 	/*
 	|--------------------------------------------------------------------------
