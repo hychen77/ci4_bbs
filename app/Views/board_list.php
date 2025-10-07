@@ -1,4 +1,4 @@
-    <table class="table">
+   <table class="table">
         <thead>
             <tr>
             <th scope="col">번호</th>
@@ -8,11 +8,15 @@
             </tr>
         </thead>
         <tbody id="board_list">
+            <?php
+            foreach($list as $ls){
+            ?>
                 <tr>
-                    <th scope="row">1</th>
-                    <td>홍길동</td>
-                    <td>게시판의 글</td>
-                    <td>2022.10.26</td>
+                    <th scope="row"><?php echo $ls->bid;?></th>
+                    <td><?php echo $ls->userid;?></td>
+                    <td><?php echo $ls->subject;?></td>
+                    <td><?php echo $ls->regdate;?></td>
                 </tr>
+            <?php }?>
         </tbody>
         </table>
