@@ -406,7 +406,8 @@ class UploadedFile extends File implements UploadedFileInterface
 		$fileName   = $fileName ?? $this->getRandomName();
 
 		// Move the uploaded file to a new location.
-		return ($this->move(WRITEPATH . 'uploads/' . $folderName, $fileName)) ?
+		//return ($this->move(WRITEPATH . 'uploads/' . $folderName, $fileName)) ?
+		return ($this->move(ROOTPATH . 'public/uploads/' . $folderName, $fileName)) ?
 				$folderName . $this->name : null;
 	}
 
