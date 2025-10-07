@@ -53,36 +53,40 @@ class Board extends BaseController
             }
         }
 
-        $file = $this->request->getFile('upfile');//첨부한 파일의 정보를 가져온다.
-        if($file->getName()){//파일 정보가 있으면 저장한다.
-            $filename = $file->getName();//기존 파일명을 저장할때 필요하다. 여기서는 사용하지 않는다.
-            //$filepath = WRITEPATH. 'uploads/' . $file->store(); 매뉴얼에 나와있는 파일 저장 방법이다.여기서는 안쓴다.
-            $newName = $file->getRandomName();//서버에 저장할때 파일명을 바꿔준다.
-            $filepath = $file->store('board/', $newName);//CI4의 store 함수를 이용해 저장한다.
+        //$file = $this->request->getFile('upfile');//첨부한 파일의 정보를 가져온다.
+        $files = $this->request->getFileMultiple("upfile"); //다중 업로드 파일 정보
+        $filepath = array();
+        foreach($files as $file){
+            if($file->getName()){//파일 정보가 있으면 저장한다.
+                $filename = $file->getName();//기존 파일명을 저장할때 필요하다. 여기서는 사용하지 않는다.
+                //$filepath = WRITEPATH. 'uploads/' . $file->store(); 매뉴얼에 나와있는 파일 저장 방법이다.여기서는 안쓴다.
+                $newName = $file->getRandomName();//서버에 저장할때 파일명을 바꿔준다.
+                $filepath[] = $file->store('board/', $newName);//CI4의 store 함수를 이용해 저장한다. 저장한 파일의 경로와 파일명을 리턴, 배열로 저장한다.
+            }
         }
 
         $sql="insert into board (userid,subject,content) values ('".$_SESSION['userid']."','".$subject."','".$content."')";
         $rs = $db->query($sql);
         $insertid=$db->insertID();
-        if($file->getName()){
-            $sql2="INSERT INTO file_table
-                    (bid, userid, filename, type)
-                    VALUES('".$insertid."', '".$_SESSION['userid']."', '".$filepath."','board')";
-            $rs2 = $db->query($sql2);                
+        foreach($filepath as $fp){//배열로 저장한 파일 저장 정보를 디비에 입력한다.
+            if(isset($fp)){
+                $sql2="INSERT INTO file_table
+                        (bid, userid, filename, type)
+                        VALUES('".$insertid."', '".$_SESSION['userid']."', '".$fp."', 'board')";
+                $rs2 = $db->query($sql2);                
+            }
         }
-        return $this->response->redirect(site_url('/board'));
+        return $this->response->redirect(site_url('/boardView/'.$insertid));
     }
 
     public function view($bid = null)
     {
         $db = db_connect();
-        $query = "select b.*,f.filename from board b
-        left join file_table f on b.bid=f.bid where f.type='board' and b.bid=".$bid;
+        $query = "select b.*,(select GROUP_CONCAT(filename) from file_table f where f.type='board' and f.bid=b.bid) as fs from board b where b.bid=".$bid;
         $rs = $db->query($query);
         $data['view'] = $rs->getRow();
-        //error_log ('['.__FILE__.']['.__FUNCTION__.']['.__LINE__.']['.date("YmdHis").']'.print_r($data,true)."\n", 3, './php_log_'.date("Ymd").'.log');//로그를 남긴다.
         return render('board_view', $data);  
-    } 
+    }
 
     public function modify($bid = null)
     {

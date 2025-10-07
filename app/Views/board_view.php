@@ -13,10 +13,16 @@
         </p>
         <br>
         <?php
-          if(isset($view->filename)){
-        ?>
-          <img src="<?php echo  base_url('/uploads/'.$view->filename);?>">
-        <?php }?>
+        if(isset($view->fs)){
+          $vfs = explode(",",$view->fs);
+          foreach($vfs as $img){
+            if(isset($img)){
+          ?>
+            <img src="<?php echo  base_url('/uploads/'.$img);?>">
+          <?php
+            }
+          }
+        }?>
         <hr>
         <p style="text-align:right;">
           <?php
