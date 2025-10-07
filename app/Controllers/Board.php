@@ -6,6 +6,7 @@ class Board extends BaseController
 {
     public function list()
     {
-        return view('board_list');
+        return render('board_list');  
+        //return view('board_list');
     }
 }
