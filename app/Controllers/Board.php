@@ -25,6 +25,17 @@ class Board extends BaseController
         return render('board_write');  
     }
 
+    public function save()
+    {
+        $db = db_connect();
+        $subject=$this->request->getVar('subject');
+        $content=$this->request->getVar('content');
+
+        $sql="insert into board (userid,subject,content) values ('test','".$subject."','".$content."')";
+        $rs = $db->query($sql);
+        return $this->response->redirect(site_url('/board'));
+    }
+
     public function view($bid = null)
     {
         $db = db_connect();

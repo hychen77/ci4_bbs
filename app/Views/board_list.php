@@ -1,4 +1,4 @@
-   <table class="table">
+    <table class="table">
         <thead>
             <tr>
             <th scope="col">번호</th>
@@ -20,3 +20,7 @@
             <?php }?>
         </tbody>
         </table>
+
+        <p style="text-align:right;">
+            <a href="/boardWrite"><button type="button" class="btn btn-primary">등록</button><a>
+        </p>
