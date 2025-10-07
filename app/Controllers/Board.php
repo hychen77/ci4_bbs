@@ -106,12 +106,18 @@ class Board extends BaseController
         $query = "select * from board where bid=".$bid;
         $rs = $db->query($query);
         if($_SESSION['userid']==$rs->getRow()->userid){
-            $query = "delete from board where bid=".$bid;
-            $rs = $db->query($query);
+            $query3 = "select * from file_table where type='board' and bid=".$bid;//파일 테이블에서 파일 경로를 가져온다.
+            $rs3 = $db->query($query3);
+            if(unlink('uploads/'.$rs3->getRow()->filename)){//삭제한다.
+                $query4 = "delete from file_table where type='board' and bid=".$bid;
+                $rs4 = $db->query($query4);
+                $query2 = "delete from board where bid=".$bid;
+                $rs2 = $db->query($query2);
+            }
             return $this->response->redirect(site_url('/board'));
         }else{
             echo "<script>alert('본인이 작성한 글만 삭제할 수 있습니다.');location.href='/login';</script>";
             exit;
         }
-    }    
+    }   
 }
