@@ -76,12 +76,13 @@ class Board extends BaseController
     public function view($bid = null)
     {
         $db = db_connect();
-        $query = "select * from board where bid=".$bid;
+        $query = "select b.*,f.filename from board b
+        left join file_table f on b.bid=f.bid where f.type='board' and b.bid=".$bid;
         $rs = $db->query($query);
         $data['view'] = $rs->getRow();
-
+        //error_log ('['.__FILE__.']['.__FUNCTION__.']['.__LINE__.']['.date("YmdHis").']'.print_r($data,true)."\n", 3, './php_log_'.date("Ymd").'.log');//로그를 남긴다.
         return render('board_view', $data);  
-    }  
+    } 
 
     public function modify($bid = null)
     {
