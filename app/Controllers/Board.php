@@ -53,8 +53,23 @@ class Board extends BaseController
             }
         }
 
+        $file = $this->request->getFile('upfile');//첨부한 파일의 정보를 가져온다.
+        if($file->getName()){//파일 정보가 있으면 저장한다.
+            $filename = $file->getName();//기존 파일명을 저장할때 필요하다. 여기서는 사용하지 않는다.
+            //$filepath = WRITEPATH. 'uploads/' . $file->store(); 매뉴얼에 나와있는 파일 저장 방법이다.여기서는 안쓴다.
+            $newName = $file->getRandomName();//서버에 저장할때 파일명을 바꿔준다.
+            $filepath = $file->store('board/', $newName);//CI4의 store 함수를 이용해 저장한다.
+        }
+
         $sql="insert into board (userid,subject,content) values ('".$_SESSION['userid']."','".$subject."','".$content."')";
         $rs = $db->query($sql);
+        $insertid=$db->insertID();
+        if($file->getName()){
+            $sql2="INSERT INTO file_table
+                    (bid, userid, filename, type)
+                    VALUES('".$insertid."', '".$_SESSION['userid']."', '".$filepath."','board')";
+            $rs2 = $db->query($sql2);                
+        }
         return $this->response->redirect(site_url('/board'));
     }
 
