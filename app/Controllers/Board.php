@@ -9,4 +9,14 @@ class Board extends BaseController
         return render('board_list');  
         //return view('board_list');
     }
+
+    public function write()
+    {
+        return render('board_write');  
+    }
+
+    public function view()
+    {
+        return render('board_view');  
+    }    
 }
