@@ -35,6 +35,9 @@ $routes->get('/board', 'Board::list');
 $routes->get('/boardWrite', 'Board::write');
 $routes->match(['get', 'post'], 'writeSave', 'Board::save');
 $routes->get('/boardView/(:num)', 'Board::view/$1');
+$routes->get('/modify/(:num)', 'Board::modify/$1');
+$routes->get('/delete/(:num)', 'Board::delete/$1');
+
 
 //member
 $routes->get('/login', 'MemberController::login');
