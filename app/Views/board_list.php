@@ -14,7 +14,7 @@
                 <tr>
                     <th scope="row"><?php echo $ls->bid;?></th>
                     <td><?php echo $ls->userid;?></td>
-                    <td><?php echo $ls->subject;?></td>
+                    <td><a href="/boardView/<?php echo $ls->bid;?>"><?php echo $ls->subject;?></a></td>
                     <td><?php echo $ls->regdate;?></td>
                 </tr>
             <?php }?>

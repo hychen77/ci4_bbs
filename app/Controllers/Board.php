@@ -8,12 +8,12 @@ class Board extends BaseController
 {
     public function list()
     {
-        // $db = db_connect();
-        // $query = "select * from board order by bid desc";
-        // $rs = $db->query($query);
-        // $data['list'] = $rs->getResult();//결과값 저장
-        $boardModel = new BoardModel();
-        $data['list'] = $boardModel->orderBy('bid', 'DESC')->findAll();
+        $db = db_connect();
+        $query = "select * from board order by bid desc";
+        $rs = $db->query($query);
+        $data['list'] = $rs->getResult();//결과값 저장
+        // $boardModel = new BoardModel();
+        // $data['list'] = $boardModel->orderBy('bid', 'DESC')->findAll();
 
         return render('board_list', $data);//view에 리턴        
         //return render('board_list');  
@@ -25,8 +25,13 @@ class Board extends BaseController
         return render('board_write');  
     }
 
-    public function view()
+    public function view($bid = null)
     {
-        return render('board_view');  
-    }    
+        $db = db_connect();
+        $query = "select * from board where bid=".$bid;
+        $rs = $db->query($query);
+        $data['view'] = $rs->getRow();
+
+        return render('board_view', $data);  
+    }  
 }

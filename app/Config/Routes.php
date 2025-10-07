@@ -33,7 +33,7 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Home::index');
 $routes->get('/board', 'Board::list');
 $routes->get('/boardWrite', 'Board::write');
-$routes->get('/boardView', 'Board::view');
+$routes->get('/boardView/(:num)', 'Board::view/$1');
 
 /**
  * --------------------------------------------------------------------
