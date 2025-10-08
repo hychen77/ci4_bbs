@@ -195,4 +195,41 @@ var data = {
 
 }
 
+function memo_del(memoid){
+
+if(!confirm('삭제하시겠습니까?')){
+  return false;
+}
+
+var data = {
+    memoid : memoid
+};
+    $.ajax({
+        async : false ,
+        type : 'post' ,
+        url : '/memo_delete' ,
+        data  : data ,
+        dataType : 'json' ,
+        error : function() {} ,
+        success : function(return_data) {
+          if(return_data.result=="login"){
+            alert('로그인 하십시오.');
+            return;
+          }else if(return_data.result=="my"){
+            alert('본인이 작성한 글만 삭제할 수 있습니다.');
+            return;
+          }else if(return_data.result=="fail"){
+            alert('삭제하지 못했습니다. 관리자에게 문의하십시오.');
+            return;
+          }else if(return_data.result=="nodata"){
+            alert('변수값이 없거나 해당되는 메모가 없습니다.');
+            return;
+          }else{
+            $("#memo_"+memoid).hide();
+          }
+        }
+});
+
+}
+
 </script>

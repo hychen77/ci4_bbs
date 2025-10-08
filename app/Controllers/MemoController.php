@@ -94,5 +94,48 @@ class MemoController extends BaseController
         }
     }
 
+    public function memo_delete()
+    {
+        if(!isset($_SESSION['userid'])){//로그인여부
+            $retun_data = array("result"=>"login");
+            return json_encode($retun_data);
+            exit;
+        }
+        $db = db_connect();
+        $memoid=$this->request->getVar('memoid');
+        $query = "select * from memo where memoid=".$memoid;
+        $rs = $db->query($query);
+        if($memoid and $rs->getRow()->memoid){//memoid가 있는지 또는 메모가 테이블에 있는지
+            if($rs->getRow()->userid==$_SESSION['userid']){//본인이 작성한 메모인지
+                $query2= "delete from memo where memoid=".$memoid;
+                if($rs2 = $db->query($query2)){//삭제했는지
+                    $query3 = "select * from file_table where type='memo' and bid=".$rs->getRow()->bid." and memoid=".$memoid;
+                    $rs3 = $db->query($query3);
+                    if(isset($rs3->getRow()->filename) and unlink('uploads/'.$rs3->getRow()->filename)){
+                        $query4= "delete from file_table where fid=".$rs3->getRow()->fid;
+                        $rs4 = $db->query($query4);
+                    }
+                    $retun_data = array("result"=>"ok");
+                    return json_encode($retun_data);
+                    exit;
+                }else{
+                    $retun_data = array("result"=>"fail");
+                    return json_encode($retun_data);
+                    exit;
+                }
+            }else{
+                $retun_data = array("result"=>"my");
+                return json_encode($retun_data);
+                exit;
+            }
+        }else{
+            $retun_data = array("result"=>"nodata");
+            return json_encode($retun_data);
+            exit;
+        }
+       
+       
+    }
+
    
 }

@@ -44,6 +44,7 @@ $routes->post('/file_delete', 'Board::file_delete');
 $routes->match(['get', 'post'], '/memo_write', 'MemoController::memo_write');
 $routes->post('/save_image_memo', 'MemoController::save_image_memo');
 $routes->post('/memo_file_delete', 'MemoController::memo_file_delete');
+$routes->post('/memo_delete', 'MemoController::memo_delete');
 
 //member
 $routes->get('/login', 'MemberController::login');
