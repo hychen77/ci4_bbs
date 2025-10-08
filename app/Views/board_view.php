@@ -88,7 +88,7 @@
     </div>
 
 <script>
-  $("#memo_button").click(function () {
+  $("#memo_button").click(function () {//댓글등록 버튼을 클릭시
         var file_table_id = $("#file_table_id").val();
         var data = {
             memo : $('#memo').val() ,
@@ -125,7 +125,7 @@
         });
     });
 
-$("#upfile").change(function(){
+$("#upfile").change(function(){//댓글에 이미지 첨부시
 
   var files = $('#upfile').prop('files');
   for(var i=0; i < files.length; i++) {
@@ -138,6 +138,7 @@ $("#upfile").change(function(){
 
 function attachFile(file) {
   var formData = new FormData();
+  var modify_memoid = $("#modify_memoid").val();//댓글을 입력하는 중인지 댓글을 수정하는지 구분자
   formData.append("savefile", file);
   $.ajax({
       url: '/save_image_memo',
@@ -149,11 +150,19 @@ function attachFile(file) {
       type: 'POST',
       success: function (return_data) {
         if(return_data.result=='success'){
-            $("#file_table_id").val(return_data.fid);
             var html = "<div class='col' id='f_"+return_data.fid+"'><div class='card h-100'><img src='/uploads/"+return_data.savename+"' class='card-img-top'><div class='card-body'><button type='button' class='btn btn-warning' onclick='memo_file_del("+return_data.fid+")'>삭제</button></div></div></div>";
-            $("#upfile").hide();
-            $("#filebutton").hide();
-            $("#memo_image").append(html);
+           
+            if(modify_memoid){//댓글 수정시
+              $("#modify_file_table_id").val(return_data.fid);
+              $("#upfile").hide();
+              $("#filebutton_"+modify_memoid).hide();
+              $("#memo_image_"+modify_memoid).html(html);
+            }else{//댓글 입력시
+              $("#file_table_id").val(return_data.fid);
+              $("#upfile").hide();
+              $("#filebutton").hide();
+              $("#memo_image").append(html);
+            }
         }else{
           if(return_data.data=="login"){
             alert('로그인 하십시오.');
@@ -162,74 +171,133 @@ function attachFile(file) {
         }
       }
   });
-}    
-
-function memo_file_del(fid){
-
-if(!confirm('삭제하시겠습니까?')){
-return false;
 }
 
-var data = {
-    fid : fid
-};
-    $.ajax({
-        async : false ,
-        type : 'post' ,
-        url : '/memo_file_delete' ,
-        data  : data ,
-        dataType : 'json' ,
-        error : function() {} ,
-        success : function(return_data) {
-            if(return_data.result=="no"){
-                alert('삭제하지 못했습니다. 관리자에게 문의하십시오.');
-                return;
-            }else{
-              $("#f_"+fid).hide();
-              $("#file_table_id").val('');
-              $("#upfile").hide();
-              $("#filebutton").show();
-            }
-        }
-});
+function memo_file_del(fid){//댓글에 첨부이미지가 있는 경우에 첨부이미지를 삭제할때
+  var modify_memoid = $("#modify_memoid").val();
+  if(!confirm('삭제하시겠습니까?')){
+  return false;
+  }
+
+  var data = {
+      fid : fid
+  };
+      $.ajax({
+          async : false ,
+          type : 'post' ,
+          url : '/memo_file_delete' ,
+          data  : data ,
+          dataType : 'json' ,
+          error : function() {} ,
+          success : function(return_data) {
+              if(return_data.result=="no"){
+                  alert('삭제하지 못했습니다. 관리자에게 문의하십시오.');
+                  return;
+              }else{
+                if(modify_memoid){//댓글 수정시 삭제
+                  $("#filebutton_"+modify_memoid).show();
+                  $("#modify_file_table_id").val('');
+                }else{//댓글 입력시 삭제
+                  $("#filebutton").hide();
+                  $("#file_table_id").val('');
+                }
+                $("#f_"+fid).hide();
+                $("#upfile").hide();
+              }
+          }
+  });
 
 }
 
 function memo_del(memoid){
 
-if(!confirm('삭제하시겠습니까?')){
-  return false;
+  if(!confirm('삭제하시겠습니까?')){
+    return false;
+  }
+
+  var data = {
+      memoid : memoid
+  };
+      $.ajax({
+          async : false ,
+          type : 'post' ,
+          url : '/memo_delete' ,
+          data  : data ,
+          dataType : 'json' ,
+          error : function() {} ,
+          success : function(return_data) {
+            if(return_data.result=="login"){
+              alert('로그인 하십시오.');
+              return;
+            }else if(return_data.result=="my"){
+              alert('본인이 작성한 글만 삭제할 수 있습니다.');
+              return;
+            }else if(return_data.result=="fail"){
+              alert('삭제하지 못했습니다. 관리자에게 문의하십시오.');
+              return;
+            }else if(return_data.result=="nodata"){
+              alert('변수값이 없거나 해당되는 메모가 없습니다.');
+              return;
+            }else{
+              $("#memo_"+memoid).hide();
+            }
+          }
+  });
+
 }
 
-var data = {
-    memoid : memoid
-};
-    $.ajax({
+
+function memo_modify(memoid){//댓글수정버튼 클릭시
+
+  var data = {
+      memoid : memoid
+  };
+
+  $.ajax({
         async : false ,
         type : 'post' ,
-        url : '/memo_delete' ,
+        url : '/memo_modify' ,
         data  : data ,
-        dataType : 'json' ,
+        dataType : 'html' ,
         error : function() {} ,
         success : function(return_data) {
-          if(return_data.result=="login"){
-            alert('로그인 하십시오.');
-            return;
-          }else if(return_data.result=="my"){
-            alert('본인이 작성한 글만 삭제할 수 있습니다.');
-            return;
-          }else if(return_data.result=="fail"){
-            alert('삭제하지 못했습니다. 관리자에게 문의하십시오.');
-            return;
-          }else if(return_data.result=="nodata"){
-            alert('변수값이 없거나 해당되는 메모가 없습니다.');
+          if(return_data=="my"){
+            alert('본인이 작성한 글만 수정할 수 있습니다.');
             return;
           }else{
-            $("#memo_"+memoid).hide();
+            $("#memo_"+memoid).html(return_data);
           }
         }
-});
+  });
 
 }
+
+function memo_modify_update(memoid){//댓글 수정 후 저장할때
+  var modify_file_table_id = $("#modify_file_table_id").val();
+  var data = {
+      memoid : memoid,
+      modify_file_table_id : modify_file_table_id,
+      memo_text : $("#memo_text_"+memoid).val()
+  };
+
+  $.ajax({
+        async : false ,
+        type : 'post' ,
+        url : '/memo_modify_update' ,
+        data  : data ,
+        dataType : 'html' ,
+        error : function() {} ,
+        success : function(return_data) {
+          if(return_data=="my"){
+            alert('본인이 작성한 글만 수정할 수 있습니다.');
+            return;
+          }else{
+            $("#memo_"+memoid).html(return_data);
+          }
+        }
+  });
+
+}
+
 
 </script>

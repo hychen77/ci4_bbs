@@ -137,5 +137,87 @@ class MemoController extends BaseController
        
     }
 
+
+    public function memo_modify()//댓글 수정 버튼을 눌렀을때 작동
+    {
+        $db = db_connect();
+        $memoid=$this->request->getVar('memoid');
+        $query = "select * from memo where memoid=".$memoid;
+        $rs = $db->query($query);
+            if($rs->getRow()->userid==$_SESSION['userid']){//본인이 작성한 메모인지
+                $query3 = "select * from file_table where type='memo' and memoid=".$memoid;
+                $rs3 = $db->query($query3);
+                $html = "<form class=\"row g-3\">
+                    <input type=\"hidden\" id=\"modify_memoid\" value=\"".$memoid."\">
+                    <input type=\"hidden\" id=\"modify_file_table_id\" value=\"\">
+
+                    <div class=\"col-md-8\" style=\"padding:10px;\">
+                        <textarea class=\"form-control\" id=\"memo_text_".$rs->getRow()->memoid."\" style=\"height: 60px\">".$rs->getRow()->memo."</textarea>
+                    </div>
+                    <div class=\"col-md-2\" style=\"padding:10px;\">
+                        <button type=\"button\" class=\"btn btn-secondary\" onclick=\"memo_modify_update(".$rs->getRow()->memoid.")\" >댓글수정</button>
+                    </div>";
+                if(isset($rs3->getRow()->fid)){
+                    $html .= "<div class=\"col-md-2\" style=\"padding:10px;\" id=\"memo_image_".$memoid."\">
+                                <div style=\"display:none;\" class=\"btn btn-warning\" id=\"filebutton_".$memoid."\" onclick=\"$('#upfile').click();\">사진첨부</div>
+                                <input type=\"file\" name=\"upfile\" class=\"upfile\" id=\"upfile_".$memoid."\" style=\"display:none;\" />
+                                <div class=\"col\" id=\"f_".$rs3->getRow()->fid."\"><div class=\"card h-100\"><img src=\"/uploads/".$rs3->getRow()->filename."\" class=\"card-img-top\"><div class=\"card-body\"><button type=\"button\" class=\"btn btn-warning\" onclick=\"memo_file_del(".$rs3->getRow()->fid.")\">삭제</button></div></div></div>
+                            </div>";
+                }else{
+                    $html .= "<div class=\"col-md-2\" style=\"padding:10px;\" id=\"memo_image_".$memoid."\">
+                                <div class=\"btn btn-warning\" id=\"filebutton_".$memoid."\" onclick=\"$('#upfile').click();\">사진첨부</div>
+                                <input type=\"file\" name=\"upfile\" id=\"upfile\" style=\"display:none;\" />
+                            </div>";
+                }
+                    $html .= "</form>";
+                echo $html;
+            }else{
+                echo "my";
+                exit;
+            }
+    }
+
+    public function memo_modify_update()//댓글을 수정 후 저장할때 작동
+    {
+        $db = db_connect();
+        $memoid=$this->request->getVar('memoid');
+        $memo_text=$this->request->getVar('memo_text');
+        $modify_file_table_id=$this->request->getVar('modify_file_table_id');
+        $query = "select * from memo where memoid=".$memoid;
+        $rs = $db->query($query);
+            if($rs->getRow()->userid==$_SESSION['userid']){//본인이 작성한 메모인지
+                $uq="update memo set memo='".$memo_text."' where memoid=".$memoid;
+                $uqs = $db->query($uq);
+
+                if(!empty($modify_file_table_id)){//첨부한 파일이 있는 경우에만
+                    $uq="update file_table set bid=".$rs->getRow()->bid.", memoid=".$memoid." where fid=".$modify_file_table_id;
+                    $uqs = $db->query($uq);
+                }
+
+                $query3 = "select * from file_table where type='memo' and memoid=".$memoid;
+                $rs3 = $db->query($query3);
+
+                if(!empty($rs3->getRow()->filename)){//첨부한 파일이 있는 경우에만
+                    $imgarea = "<img src='/uploads/".$rs3->getRow()->filename."' style='max-width:90%'>";
+                }else{
+                    $imgarea="";
+                }
+
+                $return_data = "<div class=\"row g-0\">
+                            <div class=\"col-md-12\">
+                            <div class=\"card-body\">
+                            <p class=\"card-text\">".$imgarea."<br>".$memo_text."</p>
+                            <p class=\"card-text\"><small class=\"text-muted\">".$_SESSION['userid']." / now</small></p>
+                            <p class=\"card-text\" style=\"text-align:right\"><a href=\"javascript:;\" onclick=\"memo_modify(".$memoid.")\"><button type=\"button\" class=\"btn btn-secondary btn-sm\">수정</button></a>&nbsp;<a href=\"javascript:;\" onclick=\"memo_del(".$memoid.")\"><button type=\"button\" class=\"btn btn-secondary btn-sm\">삭제</button></a></p>
+                            </div>
+                        </div>
+                        </div>";
+                return $return_data;
+            }else{
+                echo "my";
+                exit;
+            }
+    }
+
    
 }
