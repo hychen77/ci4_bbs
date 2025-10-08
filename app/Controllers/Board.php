@@ -8,13 +8,33 @@ class Board extends BaseController
 {
     public function list()
     {
-        $db = db_connect();
-        $query = "select * from board order by bid desc";
-        $rs = $db->query($query);
-        $data['list'] = $rs->getResult();//결과값 저장
         // $boardModel = new BoardModel();
         // $data['list'] = $boardModel->orderBy('bid', 'DESC')->findAll();
 
+        $db = db_connect();
+        $page    = $this->request->getVar('page') ?? 1;//현재 페이지, 없으면 1
+        $perPage = 10;//한 페이지당 출력할 게시물 수
+        $startLimit = ($page-1)*$perPage;//쿼리의 limit 시작 부분
+        $sql = "select b.*, if((now() - regdate)<=86400,1,0) as newid
+        ,(select count(*) from file_table f where f.type='board' and f.status=1 and f.bid=b.bid) as filecnt
+        from board b where 1=1";
+        $order = " order by bid desc";
+        $limit = " limit $startLimit, $perPage";
+        $query = $sql.$order.$limit;
+        $rs = $db->query($query);
+        $rs2 = $db->query($sql);
+        $result = $rs2->getResult();
+        $total = count($result);//전체 게시물수
+
+
+        $data['list'] = $rs->getResult();
+        $data['total'] = $total;
+        $data['page'] = $page;
+        $data['perPage'] = $perPage;
+
+        $pager = service('pager');//페이저를 호출한다.
+        $pager_links = $pager->makeLinks($page, $perPage, $total, 'default_full');
+        $data['pager_links'] = $pager_links;//페이징을 구현될 부분을 리턴한다.        
         return render('board_list', $data);//view에 리턴        
         //return render('board_list');  
         //return view('board_list');
