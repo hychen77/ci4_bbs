@@ -111,10 +111,13 @@ class Board extends BaseController
     public function modify($bid = null)
     {
         $db = db_connect();
-        $query = "select * from board where bid=".$bid;
+        $query = "select * from board b where b.bid=".$bid;
         $rs = $db->query($query);
         if($_SESSION['userid']==$rs->getRow()->userid){
             $data['view'] = $rs->getRow();
+            $query3 = "select * from file_table where type='board' and bid=".$bid;
+            $rs3 = $db->query($query3);
+            $data['fs']=$rs3->getResult();
             return render('board_write', $data);  
         }else{
             echo "<script>alert('본인이 작성한 글만 수정할 수 있습니다.');location.href='/login';</script>";
