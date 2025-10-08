@@ -16,6 +16,8 @@ class Board extends BaseController
         $perPage = 10;//한 페이지당 출력할 게시물 수
         $startLimit = ($page-1)*$perPage;//쿼리의 limit 시작 부분
         $sql = "select b.*, if((now() - regdate)<=86400,1,0) as newid
+        ,(select count(*) from memo m where m.status=1 and m.bid=b.bid) as memocnt
+        ,(select m.regdate from memo m where m.status=1 and m.bid=b.bid order by m.memoid desc limit 1) as memodate
         ,(select count(*) from file_table f where f.type='board' and f.status=1 and f.bid=b.bid) as filecnt
         from board b where 1=1";
         $order = " order by bid desc";
@@ -59,6 +61,7 @@ class Board extends BaseController
         $bid=$this->request->getVar('bid');//bid값이 있으면 수정이고 아니면 등록이다.
         $subject=$this->request->getVar('subject');
         $content=$this->request->getVar('content');
+        $file_table_id=$this->request->getVar('file_table_id');
 
         if($bid){
             $query = "select * from board where bid=".$bid;
@@ -66,6 +69,15 @@ class Board extends BaseController
             if($_SESSION['userid']==$rs->getRow()->userid){
                 $sql="update board set subject='".$subject."', content='".$content."' where bid=".$bid;
                 $rs = $db->query($sql);
+                if(isset($file_table_id)){//첨부한 이미지가 있으면
+                    $fti=explode(',',$file_table_id);
+                    foreach($fti as $fi){
+                        if(isset($fi)){
+                            $sql2="update file_table set bid=".$bid." where fid=".$fi;
+                            $rs2 = $db->query($sql2);                
+                        }
+                    }
+                }
                 return $this->response->redirect(site_url('/boardView/'.$bid));
             }else{
                 echo "<script>alert('본인이 작성한 글만 수정할 수 있습니다.');location.href='/login';</script>";
@@ -96,15 +108,33 @@ class Board extends BaseController
                 $rs2 = $db->query($sql2);                
             }
         }
+
+        if(isset($file_table_id)){//첨부한 이미지가 있으면
+            $fti=explode(',',$file_table_id);
+            foreach($fti as $fi){
+                if(isset($fi)){
+                    $sql2="update file_table set bid=".$insertid." where fid=".$fi;
+                    $rs2 = $db->query($sql2);                
+                }
+            }
+        }
+
         return $this->response->redirect(site_url('/boardView/'.$insertid));
     }
 
     public function view($bid = null)
     {
         $db = db_connect();
-        $query = "select b.*,(select GROUP_CONCAT(filename) from file_table f where f.type='board' and f.bid=b.bid) as fs from board b where b.bid=".$bid;
+        $query = "select b.*,(select GROUP_CONCAT(filename) from file_table f where f.bid=b.bid and f.type='board') as fs from board b where b.bid=".$bid;
         $rs = $db->query($query);
         $data['view'] = $rs->getRow();
+
+        //메모
+        $query2="select *, m.userid, m.regdate, m.memoid from memo m
+                left join file_table f on m.memoid=f.memoid and f.type='memo'
+                where m.status=1 and m.bid=".$bid." order by ifnull(m.pid,m.memoid) desc, m.memoid asc";
+        $rs2 = $db->query($query2);
+        $data['memoArray'] = $rs2->getResult();
         return render('board_view', $data);  
     }
 
@@ -133,21 +163,22 @@ class Board extends BaseController
         $query = "select * from board where bid=".$bid;
         $rs = $db->query($query);
         if($_SESSION['userid']==$rs->getRow()->userid){
-            $query3 = "select * from file_table where type='board' and bid=".$bid;//파일 테이블에서 파일 경로를 가져온다.
+            $query3 = "select * from file_table where type='board' and bid=".$bid;
             $rs3 = $db->query($query3);
-            if(unlink('uploads/'.$rs3->getRow()->filename)){//삭제한다.
-                $query4 = "delete from file_table where type='board' and bid=".$bid;
-                $rs4 = $db->query($query4);
-                $query2 = "delete from board where bid=".$bid;
-                $rs2 = $db->query($query2);
+            $fs=$rs3->getResult();
+            foreach($fs as $f3){
+                unlink('uploads/'.$f3->filename);
             }
+            $query4 = "delete from file_table where type='board' and bid=".$bid;
+            $rs4 = $db->query($query4);
+            $query2 = "delete from board where bid=".$bid;
+            $rs2 = $db->query($query2);
             return $this->response->redirect(site_url('/board'));
         }else{
             echo "<script>alert('본인이 작성한 글만 삭제할 수 있습니다.');location.href='/login';</script>";
             exit;
         }
     }
-    
 
     public function save_image()
     {
@@ -177,14 +208,17 @@ class Board extends BaseController
     {
         $db = db_connect();
         $fid=$this->request->getVar('fid');
+        $file_table_id=$this->request->getVar('file_table_id');
         $query = "select * from file_table where fid=".$fid;
         $rs = $db->query($query);
         if(unlink('uploads/'.$rs->getRow()->filename)){
             $query2= "delete from file_table where fid=".$fid;
             $rs2 = $db->query($query2);
+            $file_table_id=str_replace(",".$fid,'',$file_table_id);
         }
        
-        $retun_data = array("result"=>"ok");
+       
+        $retun_data = array("result"=>"ok", "file_table_id"=>$file_table_id);
         return json_encode($retun_data);
-    }    
+    }
 }

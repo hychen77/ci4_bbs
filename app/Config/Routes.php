@@ -40,6 +40,10 @@ $routes->get('/delete/(:num)', 'Board::delete/$1');
 $routes->post('/save_image', 'Board::save_image');
 $routes->post('/file_delete', 'Board::file_delete');
 
+//댓글
+$routes->match(['get', 'post'], '/memo_write', 'MemoController::memo_write');
+$routes->post('/save_image_memo', 'MemoController::save_image_memo');
+
 //member
 $routes->get('/login', 'MemberController::login');
 $routes->get('/logout', 'MemberController::logout');
