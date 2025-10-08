@@ -47,7 +47,7 @@
             <button type="button" class="btn btn-secondary" id="memo_button">댓글등록</button>
           </div>
           <div class="col-md-2" id="memo_image">
-            <div class="btn btn-warning" id="filebutton" onclick="onclick=document.all.upfile.click()">사진첨부</div>
+            <div class="btn btn-warning" id="filebutton" onclick="$('#upfile').click();">사진첨부</div>
             <input type="file" name="upfile" id="upfile" style="display:none;" />
           </div>
 
@@ -150,7 +150,7 @@ function attachFile(file) {
       success: function (return_data) {
         if(return_data.result=='success'){
             $("#file_table_id").val(return_data.fid);
-            var html = "<div class='col' id='f_"+return_data.fid+"'><div class='card h-100'><img src='/uploads/"+return_data.savename+"' class='card-img-top'><div class='card-body'><button type='button' class='btn btn-warning' onclick='file_del("+return_data.fid+")'>삭제</button></div></div></div>";
+            var html = "<div class='col' id='f_"+return_data.fid+"'><div class='card h-100'><img src='/uploads/"+return_data.savename+"' class='card-img-top'><div class='card-body'><button type='button' class='btn btn-warning' onclick='memo_file_del("+return_data.fid+")'>삭제</button></div></div></div>";
             $("#upfile").hide();
             $("#filebutton").hide();
             $("#memo_image").append(html);
@@ -163,5 +163,36 @@ function attachFile(file) {
       }
   });
 }    
+
+function memo_file_del(fid){
+
+if(!confirm('삭제하시겠습니까?')){
+return false;
+}
+
+var data = {
+    fid : fid
+};
+    $.ajax({
+        async : false ,
+        type : 'post' ,
+        url : '/memo_file_delete' ,
+        data  : data ,
+        dataType : 'json' ,
+        error : function() {} ,
+        success : function(return_data) {
+            if(return_data.result=="no"){
+                alert('삭제하지 못했습니다. 관리자에게 문의하십시오.');
+                return;
+            }else{
+              $("#f_"+fid).hide();
+              $("#file_table_id").val('');
+              $("#upfile").hide();
+              $("#filebutton").show();
+            }
+        }
+});
+
+}
 
 </script>

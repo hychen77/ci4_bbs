@@ -76,4 +76,23 @@ class MemoController extends BaseController
         $retun_data = array("result"=>"success", "fid"=>$insertid, "savename"=>$filepath);
         return json_encode($retun_data);
     }
+
+    public function memo_file_delete()
+    {
+        $db = db_connect();
+        $fid=$this->request->getVar('fid');
+        $query = "select * from file_table where type='memo' and fid=".$fid;
+        $rs = $db->query($query);
+        if(unlink('uploads/'.$rs->getRow()->filename)){
+            $query2= "delete from file_table where type='memo' and fid=".$fid;
+            $rs2 = $db->query($query2);
+            $retun_data = array("result"=>"ok");
+            return json_encode($retun_data);
+        }else{
+            $retun_data = array("result"=>"no");
+            return json_encode($retun_data);
+        }
+    }
+
+   
 }
