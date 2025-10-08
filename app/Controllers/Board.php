@@ -143,5 +143,45 @@ class Board extends BaseController
             echo "<script>alert('본인이 작성한 글만 삭제할 수 있습니다.');location.href='/login';</script>";
             exit;
         }
-    }   
+    }
+    
+
+    public function save_image()
+    {
+        $db = db_connect();
+       
+        $file = $this->request->getFile('savefile');
+            if($file->getName()){
+                $filename = $file->getName();
+                //$filepath = WRITEPATH. 'uploads/' . $file->store();
+                $newName = $file->getRandomName();
+                $filepath = $file->store('board/', $newName);
+            }
+
+            if(isset($filepath)){
+                $sql2="INSERT INTO file_table
+                        (bid, userid, filename, type)
+                        VALUES('', '".$_SESSION['userid']."', '".$filepath."', 'board')";
+                $rs2 = $db->query($sql2);
+                $insertid=$db->insertID();                
+            }
+
+        $retun_data = array("result"=>"success", "fid"=>$insertid, "savename"=>$filepath);
+        return json_encode($retun_data);
+    }
+
+    public function file_delete()
+    {
+        $db = db_connect();
+        $fid=$this->request->getVar('fid');
+        $query = "select * from file_table where fid=".$fid;
+        $rs = $db->query($query);
+        if(unlink('uploads/'.$rs->getRow()->filename)){
+            $query2= "delete from file_table where fid=".$fid;
+            $rs2 = $db->query($query2);
+        }
+       
+        $retun_data = array("result"=>"ok");
+        return json_encode($retun_data);
+    }    
 }
