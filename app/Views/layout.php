@@ -15,6 +15,14 @@
   <div class="col-md-8" style="margin:auto;padding:20px;">
   <div class="wrap">
   <!-- Header -->
+          <p style="text-align:right;">
+            <?php
+            if(isset($_SESSION['userid'])){
+            ?>
+                <?php echo $_SESSION['username']?> 반갑습니다.
+                <a href="/logout"><button type="button" class="btn btn-warning">로그아웃</button><a>
+            <?php }?>
+          </p>
 
     <?php echo $content; ?>
  

@@ -16,25 +16,28 @@
   <div class="wrap">
   <!-- Header -->
 
-  <form class="row g-3 needs-validation" action="<?php echo base_url(); ?>/loginok" method="post">
+  <form class="row g-3 needs-validation" action="<?php echo base_url(); ?>/loginjoinok" method="post">
        
         <div class="col-12">
             <label for="validationCustom02" class="form-label">아이디</label>
             <input type="text" class="form-control" id="userid" name="userid" placeholder="" required>
         </div>
         <div class="col-12">
+            <label for="validationCustom02" class="form-label">이름</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="" required>
+        </div>
+        <div class="col-12">
             <label for="validationCustom02" class="form-label">비밀번호</label>
             <input type="password" class="form-control" id="passwd" name="passwd" placeholder="" required>
         </div>
-               
         <div class="col-12">
-            <button class="btn btn-primary" type="submit">로그인</button>
+            <label for="validationCustom02" class="form-label">이메일</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="" required>
+        </div>
+        <div class="col-12">
+            <button class="btn btn-primary" type="submit">회원가입</button>
         </div>
     </form>
-        <div class="col-12" style="text-align:right;">
-            <a href="/login_join"><button class="btn btn-warning" >회원가입</button></a>
-        </div>
-
   
   <!-- Footer -->
   </div>

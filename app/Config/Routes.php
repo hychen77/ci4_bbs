@@ -30,7 +30,7 @@ $routes->setAutoRoute(true);
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
-$routes->get('/', 'Home::index');
+$routes->get('/', 'MemberController::login');
 $routes->get('/board', 'Board::list');
 $routes->get('/boardWrite', 'Board::write');
 $routes->match(['get', 'post'], 'writeSave', 'Board::save');
@@ -41,8 +41,10 @@ $routes->get('/delete/(:num)', 'Board::delete/$1');
 
 //member
 $routes->get('/login', 'MemberController::login');
+$routes->get('/login_join', 'MemberController::loginjoin');
 $routes->get('/logout', 'MemberController::logout');
 $routes->match(['get', 'post'], '/loginok', 'MemberController::loginok');
+$routes->match(['get', 'post'], '/loginjoinok', 'MemberController::loginjoinok');
 
 /**
  * --------------------------------------------------------------------
