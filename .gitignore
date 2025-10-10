@@ -61,7 +61,7 @@ writable/uploads/*
 !writable/uploads/index.html
 
 writable/debugbar/*
-
+public/php_log_*
 php_errors.log
 
 #-------------------------
